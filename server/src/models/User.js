@@ -3,23 +3,28 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 
 const userSchema = new mongoose.Schema({
-  name: String,
-  email: { type: String, unique: true },
-  password: String,
+  name: { type: String, required: true },
+  email: { type: String, unique: true, required: true },
+  password: { type: String, required: true, select: false }, // exclude by default
   role: { type: String, enum: ['candidate', 'recruiter', 'admin'], default: 'candidate' },
   skills: [String],
   experience_years: Number,
   education: String,
   location: String,
 
-  // ✅ Cloudinary URLs & public IDs
+  // Cloudinary URLs & public IDs
   resume_url: String,
   resume_public_id: String,
   profile_pic_url: String,
   profile_pic_public_id: String,
 
+  // Optional password reset fields
+  resetPasswordToken: String,
+  resetPasswordExpire: Date,
+
   createdAt: { type: Date, default: Date.now },
 });
+
 // 🔐 Hash password before saving
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
@@ -33,7 +38,7 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-// 🔁 Generate password reset token
+// 🔁 Generate password reset token (optional, if using JWT you can skip)
 userSchema.methods.getResetToken = function () {
   const resetToken = crypto.randomBytes(20).toString('hex');
 

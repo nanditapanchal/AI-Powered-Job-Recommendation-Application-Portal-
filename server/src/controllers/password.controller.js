@@ -1,9 +1,32 @@
 import jwt from 'jsonwebtoken';
-import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
+import User from '../models/User.js';
 import nodemailer from 'nodemailer';
 
-// 📨 Forgot Password (sends reset link via email)
+// 🔒 Change Password (logged-in users)
+export const changePassword = async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+
+  try {
+    // Fetch user WITH password
+    const user = await User.findById(req.user.id).select('+password');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Compare old password
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) return res.status(400).json({ message: 'Incorrect old password' });
+
+    // Set new password (pre-save hook will hash it)
+    user.password = newPassword;
+    await user.save();
+
+    res.json({ message: 'Password changed successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+// 📨 Forgot Password (send reset link)
 export const forgotPassword = async (req, res) => {
   const { email } = req.body;
 
@@ -14,17 +37,18 @@ export const forgotPassword = async (req, res) => {
     // Create JWT token valid for 15 min
     const resetToken = jwt.sign(
       { id: user._id },
-      process.env.JWT_RESET_SECRET, // create separate secret for reset tokens
+      process.env.JWT_RESET_SECRET,
       { expiresIn: '15m' }
     );
 
-    const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
+    const encodedToken = encodeURIComponent(resetToken); // make URL-safe
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${encodedToken}`;
 
     // Send email via Nodemailer
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: process.env.SMTP_PORT,
-      secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+      secure: process.env.SMTP_SECURE === 'true',
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS
@@ -41,7 +65,7 @@ export const forgotPassword = async (req, res) => {
              <p>This link will expire in 15 minutes.</p>`
     });
 
-res.json({ message: 'Reset link sent to email', token: resetToken });
+    res.json({ message: 'Reset link sent to email' });
 
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
@@ -54,34 +78,15 @@ export const resetPassword = async (req, res) => {
   const { password } = req.body;
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_RESET_SECRET);
+    const decoded = jwt.verify(decodeURIComponent(token), process.env.JWT_RESET_SECRET);
     const user = await User.findById(decoded.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    user.password = password;
+    user.password = await bcrypt.hash(password, 10); // hash password
     await user.save();
 
     res.json({ message: 'Password reset successful' });
   } catch (err) {
     res.status(400).json({ message: 'Invalid or expired token', error: err.message });
-  }
-};
-
-// 🔒 Change Password (logged-in users)
-export const changePassword = async (req, res) => {
-  const { oldPassword, newPassword } = req.body;
-  try {
-    const user = await User.findById(req.user.id);
-    if (!user) return res.status(404).json({ message: 'User not found' });
-
-    const isMatch = await bcrypt.compare(oldPassword, user.password);
-    if (!isMatch) return res.status(400).json({ message: 'Incorrect old password' });
-
-    user.password = newPassword;
-    await user.save();
-
-    res.json({ message: 'Password changed successfully' });
-  } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
