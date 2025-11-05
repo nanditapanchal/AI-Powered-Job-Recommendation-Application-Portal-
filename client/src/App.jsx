@@ -8,6 +8,9 @@ import CandidateDashboard from './pages/dashboard/CandidateDashboard';
 import RecruiterDashboard from './pages/dashboard/RecruiterDashboard';
 import AdminDashboard from './pages/dashboard/AdminDashboard';
 import { useAuth } from './contexts/AuthContext';
+import ChangePassword from './pages/auth/ChangePassword';
+
+
 
 const ProtectedRoute = ({ children, role }) => {
   const { user, loading } = useAuth();
@@ -25,7 +28,11 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
-
+<Route path="/change-password" element={
+  <ProtectedRoute>
+    <ChangePassword />
+  </ProtectedRoute>
+} />
         <Route path="/candidate" element={<ProtectedRoute role="candidate"><CandidateDashboard /></ProtectedRoute>} />
         <Route path="/recruiter" element={<ProtectedRoute role="recruiter"><RecruiterDashboard /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />

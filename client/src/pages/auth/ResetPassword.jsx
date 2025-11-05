@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useAuth } from '../../contexts/AuthContext';
 import Button from '../../components/Button';
 
 export default function ResetPassword() {
@@ -12,8 +12,6 @@ export default function ResetPassword() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
   const [message, setMessage] = useState('');
 
   const handleSubmit = async (e) => {
@@ -22,14 +20,15 @@ export default function ResetPassword() {
       setMessage('Passwords do not match');
       return;
     }
+
     setLoading(true);
     setMessage('');
     try {
-      await resetPassword(token, password);
+      await resetPassword(decodeURIComponent(token), password);
       setMessage('Password reset successful! Redirecting to login...');
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
-      setMessage('Failed to reset password. Link might be invalid or expired.');
+      setMessage('Invalid or expired link.');
     }
     setLoading(false);
   };
@@ -47,43 +46,25 @@ export default function ResetPassword() {
           Reset Password
         </h2>
 
-        {message && <p className="text-center mb-4 text-red-600">{message}</p>}
+        {message && <p className="mb-4 text-center text-sm text-red-600">{message}</p>}
 
-        <div className="relative mb-4">
-          <input
-            type={showPassword ? 'text' : 'password'}
-            placeholder="New Password"
-            className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 transition pr-12"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <button
-            type="button"
-            className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-indigo-600 transition"
-            onClick={() => setShowPassword(!showPassword)}
-          >
-            {showPassword ? 'Hide' : 'Show'}
-          </button>
-        </div>
+        <input
+          type="password"
+          placeholder="New Password"
+          className="w-full p-4 mb-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
 
-        <div className="relative mb-6">
-          <input
-            type={showConfirm ? 'text' : 'password'}
-            placeholder="Confirm Password"
-            className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 transition pr-12"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-          />
-          <button
-            type="button"
-            className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-indigo-600 transition"
-            onClick={() => setShowConfirm(!showConfirm)}
-          >
-            {showConfirm ? 'Hide' : 'Show'}
-          </button>
-        </div>
+        <input
+          type="password"
+          placeholder="Confirm Password"
+          className="w-full p-4 mb-6 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          required
+        />
 
         <motion.div whileTap={{ scale: 0.95 }}>
           <Button

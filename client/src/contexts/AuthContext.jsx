@@ -6,21 +6,27 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null); // store JWT token
   const [loading, setLoading] = useState(true);
 
-  // Load user from localStorage
+  // Load user + token from localStorage
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
+    const storedToken = localStorage.getItem('token');
     if (storedUser) setUser(JSON.parse(storedUser));
+    if (storedToken) setToken(storedToken);
     setLoading(false);
   }, []);
 
-  // Login function
+  // Login
   const login = async (email, password) => {
     try {
       const res = await axios.post('/auth/login', { email, password });
-      setUser(res.data.user);
-      localStorage.setItem('user', JSON.stringify(res.data.user));
+      const { user, token } = res.data;
+      setUser(user);
+      setToken(token);
+      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('token', token);
       toast.success('Logged in successfully!');
       return res.data;
     } catch (err) {
@@ -29,7 +35,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Register function
+  // Register
   const register = async (name, email, password, role) => {
     try {
       const res = await axios.post('/auth/register', { name, email, password, role });
@@ -44,11 +50,13 @@ export const AuthProvider = ({ children }) => {
   // Logout
   const logout = () => {
     setUser(null);
+    setToken(null);
     localStorage.removeItem('user');
+    localStorage.removeItem('token');
     toast.success('Logged out successfully!');
   };
 
-  // Forgot Password
+  // Forgot password
   const forgotPassword = async (email) => {
     try {
       await axios.post('/auth/forgot-password', { email });
@@ -59,7 +67,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Reset Password
+  // Reset password
   const resetPassword = async (token, password) => {
     try {
       await axios.post(`/auth/reset-password/${token}`, { password });
@@ -70,15 +78,36 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Change password
+  const changePassword = async (oldPassword, newPassword) => {
+    try {
+      if (!token) throw new Error('Not logged in');
+
+      const res = await axios.post(
+        '/auth/change-password',
+        { oldPassword, newPassword },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      toast.success(res.data.message);
+      return res.data;
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to change password');
+      throw err;
+    }
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
+      token,
       loading,
       login,
       register,
       logout,
       forgotPassword,
-      resetPassword
+      resetPassword,
+      changePassword
     }}>
       {children}
     </AuthContext.Provider>
