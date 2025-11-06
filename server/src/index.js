@@ -12,7 +12,7 @@ import recruiterRoutes from './routes/recruiter.routes.js';
 import uploadRoutes from './routes/upload.routes.js';
 import applicationRoutes from './routes/application.routes.js';
 import userRoutes from './routes/user.routes.js';
-
+import adminRoutes from './routes/admin.js';
 
 dotenv.config();
 
@@ -27,9 +27,10 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/jobs', jobsRoutes);
 app.use('/api/recommend', recommendRoutes);
-app.use('/api/recruiter', recruiterRoutes);
+app.use('/api/recruiter/jobs', recruiterRoutes);
 app.use('/api/applications', applicationRoutes);
 app.use('/api', userRoutes);
+app.use('/api/admin', adminRoutes);
 app.get('/', (req, res) => res.json({ message: 'JobRec Server OK' }));
 
 const PORT = process.env.PORT || 5000;

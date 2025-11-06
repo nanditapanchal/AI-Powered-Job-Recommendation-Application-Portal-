@@ -5,20 +5,38 @@ import crypto from 'crypto';
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, unique: true, required: true },
-  password: { type: String, required: true, select: false }, // exclude by default
-  role: { type: String, enum: ['candidate', 'recruiter', 'admin'], default: 'candidate' },
+  password: { type: String, required: true, select: false }, // excluded from queries by default
+
+  role: { 
+    type: String, 
+    enum: ['candidate', 'recruiter', 'admin'], 
+    default: 'candidate' 
+  },
+
+  // Optional profile details
   skills: [String],
   experience_years: Number,
   education: String,
   location: String,
 
-  // Cloudinary URLs & public IDs
-  resume_url: String,
-  resume_public_id: String,
-  profile_pic_url: String,
+  // ✅ Profile Picture (Cloudinary)
+  profile_pic_url: {
+    type: String,
+    default: 'https://cdn-icons-png.flaticon.com/512/847/847969.png' // default avatar
+  },
   profile_pic_public_id: String,
 
-  // Optional password reset fields
+  // ✅ Resume (Cloudinary)
+  resume_url: String,
+  resume_public_id: String,
+
+  // ✅ Admin controls
+  isBlocked: {
+    type: Boolean,
+    default: false
+  },
+
+  // ✅ Password reset
   resetPasswordToken: String,
   resetPasswordExpire: Date,
 
@@ -33,22 +51,20 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-// 🧩 Match password during login/change
+// 🧩 Compare password for login
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-// 🔁 Generate password reset token (optional, if using JWT you can skip)
+// 🔁 Generate password reset token
 userSchema.methods.getResetToken = function () {
   const resetToken = crypto.randomBytes(20).toString('hex');
 
-  // Hash token and store in DB
   this.resetPasswordToken = crypto.createHash('sha256')
     .update(resetToken)
     .digest('hex');
 
-  // Token valid for 15 minutes
-  this.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
+  this.resetPasswordExpire = Date.now() + 15 * 60 * 1000; // 15 mins
 
   return resetToken;
 };
