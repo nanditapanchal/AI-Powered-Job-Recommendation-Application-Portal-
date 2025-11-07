@@ -48,16 +48,31 @@ router.get('/candidates/:jobId', auth, async (req, res) => {
       return res.status(403).json({ message: 'Not authorized to view applicants' });
     }
 
-    const applicants = await Application
-      .find({ job_id: req.params.jobId })
-      .populate('user_id', 'name email skills experience_years');
+    const applicants = await Application.find({ job_id: req.params.jobId })
+      .populate('user_id', 'name email skills experience_years profile_pic_url resume_url location education');
 
-    res.json(applicants);
+    const formatted = applicants.map((a) => {
+      const user = a.user_id;
+      return {
+        _id: a._id,
+        name: user?.name || 'Unknown',
+        email: user?.email || 'N/A',
+        skills: user?.skills?.length ? user.skills : ['Not specified'],
+        experience_years: user?.experience_years || 0,
+        location: user?.location || 'Not specified',
+        education: user?.education || 'Not specified',
+        profilePic: user?.profile_pic_url || 'https://cdn-icons-png.flaticon.com/512/847/847969.png',
+        resumeUrl: user?.resume_url || '',
+      };
+    });
+
+    res.json(formatted);
   } catch (err) {
     console.error('❌ Error fetching candidates:', err);
     res.status(500).json({ message: 'Failed to fetch candidates', error: err.message });
   }
 });
+
 
 // ✅ Create a new job (recruiter only)
 router.post('/', auth, async (req, res) => {

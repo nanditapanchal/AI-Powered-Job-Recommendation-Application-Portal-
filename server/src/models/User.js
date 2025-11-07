@@ -5,30 +5,51 @@ import crypto from 'crypto';
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, unique: true, required: true },
-  password: { type: String, required: true, select: false }, // excluded from queries by default
+  password: { type: String, required: true, select: false },
 
-  role: { 
-    type: String, 
-    enum: ['candidate', 'recruiter', 'admin'], 
-    default: 'candidate' 
+  role: {
+    type: String,
+    enum: ['candidate', 'recruiter', 'admin'],
+    default: 'candidate'
   },
 
   // Optional profile details
-  skills: [String],
-  experience_years: Number,
-  education: String,
-  location: String,
+  skills: {
+    type: [String],
+    default: []
+  },
+  experience_years: {
+    type: Number,
+    default: 0
+  },
+  education: {
+    type: String,
+    default: ''
+  },
+  location: {
+    type: String,
+    default: ''
+  },
 
   // ✅ Profile Picture (Cloudinary)
   profile_pic_url: {
     type: String,
-    default: 'https://cdn-icons-png.flaticon.com/512/847/847969.png' // default avatar
+    default: 'https://cdn-icons-png.flaticon.com/512/847/847969.png'
   },
-  profile_pic_public_id: String,
+  profile_pic_public_id: {
+    type: String,
+    default: ''
+  },
 
   // ✅ Resume (Cloudinary)
-  resume_url: String,
-  resume_public_id: String,
+  resume_url: {
+    type: String,
+    default: ''
+  },
+  resume_public_id: {
+    type: String,
+    default: ''
+  },
 
   // ✅ Admin controls
   isBlocked: {

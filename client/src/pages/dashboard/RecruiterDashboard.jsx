@@ -14,6 +14,7 @@ export default function RecruiterDashboard() {
   const [jobLocation, setJobLocation] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [analytics, setAnalytics] = useState({ total: 0, active: 0, applicants: 0 });
+  const [jobSalary, setJobSalary] = useState('');
 
   const [selectedJob, setSelectedJob] = useState(null);
   const [isApplicantsModalOpen, setIsApplicantsModalOpen] = useState(false);
@@ -52,16 +53,18 @@ export default function RecruiterDashboard() {
   // -------------------------------
   const addJob = async () => {
     if (!jobTitle.trim() || !jobLocation.trim()) {
-      toast.error('Please provide both title and location');
+      toast.error('Please provide title,location and Salary');
       return;
     }
 
     try {
-      await axios.post('/jobs', { title: jobTitle, location: jobLocation });
+      await axios.post('/jobs', { title: jobTitle, location: jobLocation,  salary: jobSalary });
       toast.success('Job posted successfully!');
       setIsModalOpen(false);
       setJobTitle('');
       setJobLocation('');
+      setJobSalary('');
+
       fetchJobs();
     } catch (err) {
       console.error(err);
@@ -200,6 +203,14 @@ export default function RecruiterDashboard() {
               onChange={e => setJobLocation(e.target.value)}
               className="w-full p-2 mb-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
+            <input
+              type="text"
+              placeholder="Salary (e.g. ₹8 LPA)"
+              value={jobSalary}
+              onChange={e => setJobSalary(e.target.value)}
+              className="w-full p-2 mb-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+
             <div className="flex justify-end space-x-2 mt-4">
               <Button
                 onClick={() => setIsModalOpen(false)}
