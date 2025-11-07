@@ -16,6 +16,7 @@ import {
   CheckCircle,
   Send,
   Search,
+  Sparkles,
 } from 'lucide-react';
 
 export default function CandidateDashboard() {
@@ -23,6 +24,7 @@ export default function CandidateDashboard() {
   const [profile, setProfile] = useState(null);
   const [jobs, setJobs] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState([]);
+  const [recommendedJobs, setRecommendedJobs] = useState([]); // <-- AI recommended jobs
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -59,13 +61,16 @@ export default function CandidateDashboard() {
           location: profileRes.data.location || '',
         });
 
-        // Load all recruiter jobs (not only ML-based)
+        // Load all jobs
         const jobsRes = await axios.get('/jobs', authHeaders());
         setJobs(jobsRes.data || []);
         setFilteredJobs(jobsRes.data || []);
 
         // Fetch applications
         await fetchApplications();
+
+        // Fetch AI-based recommendations
+        if (profileRes.data?._id) await fetchRecommendations(profileRes.data._id);
       } catch (err) {
         console.error('Failed to load data', err);
         toast.error('Failed to load dashboard');
@@ -83,6 +88,17 @@ export default function CandidateDashboard() {
       setApplications(res.data || []);
     } catch (err) {
       console.error('Failed to fetch applications', err);
+    }
+  };
+
+  const fetchRecommendations = async (candidateId) => {
+    try {
+      const res = await axios.get(`/recommend/${candidateId}`, authHeaders());
+      setRecommendedJobs(res.data || []);
+      console.log('AI Recommendations:', res.data);
+    } catch (err) {
+      console.error('Failed to fetch AI recommendations', err);
+      toast.error('Error fetching recommendations');
     }
   };
 
@@ -184,6 +200,7 @@ export default function CandidateDashboard() {
               { key: 'dashboard', label: 'Dashboard', icon: Grid },
               { key: 'profile', label: 'Profile', icon: User },
               { key: 'recommended', label: 'Jobs', icon: Briefcase },
+              { key: 'ai', label: 'AI Recommended', icon: Sparkles }, // <-- New tab
               { key: 'applications', label: 'Applications', icon: FileText },
             ].map((item) => {
               const Icon = item.icon;
@@ -213,7 +230,7 @@ export default function CandidateDashboard() {
 
         {/* Content */}
         <main className="flex-1 p-6">
-          {/* Analytics cards */}
+          {/* Dashboard cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             {[
               { title: 'Available Jobs', value: recommendedCount, icon: Briefcase, color: 'text-indigo-600' },
@@ -242,8 +259,8 @@ export default function CandidateDashboard() {
             })}
           </div>
 
-          {/* Dashboard / Jobs */}
-          {activeTab === 'dashboard' || activeTab === 'recommended' ? (
+          {/* Existing Jobs Section */}
+          {(activeTab === 'dashboard' || activeTab === 'recommended') && (
             <>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-bold">Find Your Perfect Job</h2>
@@ -294,9 +311,55 @@ export default function CandidateDashboard() {
                 })}
               </div>
             </>
-          ) : null}
+          )}
 
-          {/* Profile */}
+          {/* 🧠 AI Recommended Jobs Section */}
+          {activeTab === 'ai' && (
+            <>
+              <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                <Sparkles className="text-indigo-600" /> AI Recommended Jobs
+              </h2>
+              {recommendedJobs.length === 0 ? (
+                <p>No AI recommendations available yet.</p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {recommendedJobs.map((rec, idx) => {
+                    const job = rec.jobId || rec;
+                    const applied = isApplied(job);
+                    return (
+                      <motion.div
+                        key={idx}
+                        whileHover={{ scale: 1.02 }}
+                        className="bg-white rounded-2xl p-5 shadow-md flex flex-col justify-between"
+                      >
+                        <div>
+                          <h4 className="font-bold text-lg">{job.title}</h4>
+                          <p className="text-sm text-gray-600">{job.location}</p>
+                          <p className="text-gray-700 mt-2">
+                            Skills: {(job.skills_required || []).join(', ')}
+                          </p>
+                          <p className="text-xs text-gray-400 mt-1">
+                            Similarity Score: {rec.similarity || '0.000'}
+                          </p>
+                        </div>
+                        <div className="mt-4 flex items-center justify-between">
+                          {applied ? (
+                            <span className="inline-flex items-center gap-2 text-green-700 font-medium">
+                              <CheckCircle className="w-5 h-5" /> Applied
+                            </span>
+                          ) : (
+                            <Button onClick={() => openApplyModal(job)}>Apply</Button>
+                          )}
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Profile Section */}
           {activeTab === 'profile' && (
             <div className="bg-white p-6 rounded-2xl shadow-md">
               <div className="flex items-center gap-6 mb-6">
@@ -313,7 +376,6 @@ export default function CandidateDashboard() {
                   <Edit2 className="w-4 h-4 mr-2" /> {editing ? 'Cancel' : 'Edit'}
                 </Button>
               </div>
-
               {!editing ? (
                 <>
                   <p><strong>Skills:</strong> {profile?.skills?.join(', ') || 'N/A'}</p>
@@ -327,7 +389,6 @@ export default function CandidateDashboard() {
                       </a>
                     </p>
                   )}
-
                   <div className="mt-4 space-y-4">
                     <div>
                       <label className="block text-sm font-medium">Profile Picture</label>
@@ -361,7 +422,7 @@ export default function CandidateDashboard() {
             </div>
           )}
 
-          {/* Applications */}
+          {/* Applications Section */}
           {activeTab === 'applications' && (
             <>
               <h3 className="text-lg font-semibold mb-3">My Applications</h3>
@@ -418,11 +479,7 @@ export default function CandidateDashboard() {
               value={applyCover}
               onChange={(e) => setApplyCover(e.target.value)}
             />
-            <input
-              type="file"
-              onChange={(e) => setApplyFile(e.target.files[0])}
-              className="mb-3"
-            />
+            <input type="file" onChange={(e) => setApplyFile(e.target.files[0])} className="mb-3" />
             <div className="flex justify-end gap-2">
               <button className="px-4 py-2 bg-gray-200 rounded" onClick={closeApplyModal}>
                 Cancel

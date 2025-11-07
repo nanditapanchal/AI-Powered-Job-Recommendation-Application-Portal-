@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// ✅ Fix __dirname
+// ✅ Fix __dirname for ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -17,7 +17,7 @@ if (!MONGO) {
   process.exit(1);
 }
 
-// ✅ Define models on this same mongoose instance
+// ✅ Define models
 const userSchema = new mongoose.Schema({
   name: String,
   email: String,
@@ -37,37 +37,48 @@ const jobSchema = new mongoose.Schema({
 });
 const Job = mongoose.model('Job', jobSchema);
 
-// ✅ Main function
+// ✅ Main seeding function
 async function run() {
   try {
     await mongoose.connect(MONGO);
     console.log('✅ Connected to MongoDB');
 
-    await User.deleteMany({});
-    await Job.deleteMany({});
-    console.log('🧹 Cleared old data');
-
     const pass = await bcrypt.hash('password123', 10);
 
-    const candidate = await User.create({
-      name: 'Alice Candidate',
-      email: 'alice@example.com',
-      password: pass,
-      role: 'candidate',
-      skills: ['python', 'ml'],
-    });
+    // 🧑 Candidate
+    let candidate = await User.findOne({ email: 'alice@example.com' });
+    if (!candidate) {
+      candidate = await User.create({
+        name: 'Alice Candidate',
+        email: 'alice@example.com',
+        password: pass,
+        role: 'candidate',
+        skills: ['python', 'ml'],
+      });
+      console.log('🌱 Candidate added:', candidate.email);
+    } else {
+      console.log('✅ Candidate already exists:', candidate.email);
+    }
 
-    const recruiter = await User.create({
-      name: 'Acme Hiring',
-      email: 'acme.hr@example.com',
-      password: pass,
-      role: 'recruiter',
-    });
+    // 🧑‍💼 Recruiter
+    let recruiter = await User.findOne({ email: 'acme.hr@example.com' });
+    if (!recruiter) {
+      recruiter = await User.create({
+        name: 'Acme Hiring',
+        email: 'acme.hr@example.com',
+        password: pass,
+        role: 'recruiter',
+      });
+      console.log('🌱 Recruiter added:', recruiter.email);
+    } else {
+      console.log('✅ Recruiter already exists:', recruiter.email);
+    }
 
-    const jobs = [
+    // 💼 Jobs
+    const jobsData = [
       {
         title: 'Backend Developer',
-        description: 'Python Django',
+        description: 'Python Django Developer required',
         skills_required: ['python', 'django'],
         location: 'Bengaluru',
         recruiter_id: recruiter._id,
@@ -75,7 +86,7 @@ async function run() {
       },
       {
         title: 'Frontend Developer',
-        description: 'React Tailwind',
+        description: 'React Tailwind Developer required',
         skills_required: ['react', 'tailwind'],
         location: 'Remote',
         recruiter_id: recruiter._id,
@@ -83,8 +94,17 @@ async function run() {
       },
     ];
 
-    await Job.insertMany(jobs);
-    console.log('🌱 Seeded users and jobs successfully!');
+    for (const job of jobsData) {
+      const existingJob = await Job.findOne({ title: job.title, recruiter_id: recruiter._id });
+      if (!existingJob) {
+        await Job.create(job);
+        console.log('🌱 Added job:', job.title);
+      } else {
+        console.log('✅ Job already exists:', job.title);
+      }
+    }
+
+    console.log('🎉 Seeding completed successfully!');
   } catch (err) {
     console.error('❌ Seed error:', err);
   } finally {
