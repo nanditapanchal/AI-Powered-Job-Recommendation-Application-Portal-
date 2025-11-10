@@ -6,6 +6,8 @@ import Button from '../../components/Button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
+
 import {
   Grid,
   User,
@@ -22,6 +24,7 @@ import {
 } from 'lucide-react';
 
 export default function CandidateDashboard() {
+  const navigate = useNavigate();
   const { token } = useAuth();
   const [profile, setProfile] = useState(null);
   const [jobs, setJobs] = useState([]);
@@ -335,10 +338,21 @@ export default function CandidateDashboard() {
                       className="bg-white rounded-2xl p-5 shadow-md flex flex-col justify-between"
                     >
                       <div>
-                        <h4 className="font-bold text-lg">{job.title}</h4>
-                        <p className="text-sm text-gray-600">{job.company} • {job.location}</p>
-                        <p className="text-gray-700 mt-2 line-clamp-3">{job.description}</p>
-                      </div>
+  <h4 className="font-bold text-lg">{job.title}</h4>
+  <p className="text-sm text-gray-600">
+    {job.company_name || job.company} • {job.location}
+  </p>
+
+  {/* 💰 Salary Info */}
+  {job.salary && (
+    <p className="text-sm text-gray-700 mt-1">
+      💰 <span className="font-medium">{job.salary}</span>
+    </p>
+  )}
+
+  <p className="text-gray-700 mt-2 line-clamp-3">{job.description}</p>
+</div>
+
                       <div className="mt-4 flex items-center justify-between">
                         {applied ? (
                           <span className="inline-flex items-center gap-2 text-green-700 font-medium">
@@ -347,12 +361,13 @@ export default function CandidateDashboard() {
                         ) : (
                           <Button onClick={() => openApplyModal(job)}>Apply</Button>
                         )}
-                        <button
-                          className="text-sm text-gray-500 hover:underline"
-                          onClick={() => window.open(`/jobs/${job._id}`, '_blank')}
-                        >
-                          View
-                        </button>
+                        {/* <button
+  className="text-sm text-gray-500 hover:underline"
+  onClick={() => navigate(`/jobs/${job._id}`)}
+>
+  View
+</button> */}
+
                       </div>
                     </motion.div>
                   );
@@ -372,36 +387,40 @@ export default function CandidateDashboard() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {recommendedJobs.map((rec, idx) => {
-                    const job = rec.jobId || rec;
-                    const applied = isApplied(job);
-                    return (
-                      <motion.div
-                        key={idx}
-                        whileHover={{ scale: 1.02 }}
-                        className="bg-white rounded-2xl p-5 shadow-md flex flex-col justify-between"
-                      >
-                        <div>
-                          <h4 className="font-bold text-lg">{job.title}</h4>
-                          <p className="text-sm text-gray-600">{job.location}</p>
-                          <p className="text-gray-700 mt-2">
-                            Skills: {(job.skills_required || []).join(', ')}
-                          </p>
-                          <p className="text-xs text-gray-400 mt-1">
-                            Similarity Score: {rec.similarity || '0.000'}
-                          </p>
-                        </div>
-                        <div className="mt-4 flex items-center justify-between">
-                          {applied ? (
-                            <span className="inline-flex items-center gap-2 text-green-700 font-medium">
-                              <CheckCircle className="w-5 h-5" /> Applied
-                            </span>
-                          ) : (
-                            <Button onClick={() => openApplyModal(job)}>Apply</Button>
-                          )}
-                        </div>
-                      </motion.div>
-                    );
-                  })}
+  const job = rec; // since your backend returns flat structure now
+  const applied = isApplied({ _id: job.jobId });
+
+  return (
+    <motion.div
+      key={idx}
+      whileHover={{ scale: 1.02 }}
+      className="bg-white rounded-2xl p-5 shadow-md flex flex-col justify-between"
+    >
+      <div>
+        <h4 className="font-bold text-lg">{job.title}</h4>
+        <p className="text-sm text-gray-600">{job.location}</p>
+        <p className="text-gray-700 mt-2">
+          Skills: {(job.skills_required || []).join(", ")}
+        </p>
+        <p className="text-xs text-gray-400 mt-1">
+          Similarity Score: {job.similarity}
+        </p>
+      </div>
+      <div className="mt-4 flex items-center justify-between">
+        {applied ? (
+          <span className="inline-flex items-center gap-2 text-green-700 font-medium">
+            <CheckCircle className="w-5 h-5" /> Applied
+          </span>
+        ) : (
+          <Button onClick={() => openApplyModal({ _id: job.jobId, ...job })}>
+            Apply
+          </Button>
+        )}
+      </div>
+    </motion.div>
+  );
+})}
+
                 </div>
               )}
             </>
