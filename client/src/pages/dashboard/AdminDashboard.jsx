@@ -131,76 +131,71 @@ export default function AdminDashboard() {
       } flex min-h-screen transition-colors duration-500`}
     >
       {/* Sidebar */}
-      <motion.aside
-        initial={{ x: -250 }}
-        animate={{ x: sidebarOpen ? 0 : -250 }}
-        transition={{ duration: 0.3 }}
-        className={`${
-          darkMode ? "bg-gray-800" : "bg-blue-900"
-        } fixed lg:relative z-30 h-full w-64 flex-shrink-0 p-5 space-y-6 text-white shadow-xl`}
+<motion.aside
+  initial={{ x: -250 }}
+  animate={{ x: sidebarOpen || window.innerWidth >= 1024 ? 0 : -250 }}
+  transition={{ duration: 0.3 }}
+  className={`fixed lg:fixed top-0 left-0 z-30 h-screen w-64 flex-shrink-0 p-5 space-y-6 text-white shadow-xl
+    ${darkMode ? "bg-gray-800" : "bg-blue-900"}`}
+>
+  <div className="flex items-center justify-between">
+    <h2 className="text-2xl font-bold">Admin Panel</h2>
+    {/* Close button only on mobile */}
+    <button className="lg:hidden" onClick={() => setSidebarOpen(false)}>
+      <X className="w-6 h-6 text-white" />
+    </button>
+  </div>
+
+  <nav className="space-y-3 mt-6">
+    {[{ name: "Analytics", icon: BarChart3, key: "analytics" },
+      { name: "Users", icon: Users, key: "users" },
+      { name: "Jobs", icon: Briefcase, key: "jobs" }].map((tab) => (
+      <button
+        key={tab.key}
+        onClick={() => {
+          setActiveTab(tab.key);
+          setSidebarOpen(false);
+        }}
+        className={`flex items-center gap-3 w-full px-4 py-2 rounded-lg transition ${
+          activeTab === tab.key
+            ? "bg-blue-700"
+            : "hover:bg-blue-800 hover:translate-x-1"
+        }`}
       >
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Admin Panel</h2>
-          <button className="lg:hidden" onClick={() => setSidebarOpen(false)}>
-            <X className="w-6 h-6 text-white" />
-          </button>
-        </div>
+        <tab.icon className="w-5 h-5" />
+        {tab.name}
+      </button>
+    ))}
+    <button
+      onClick={() => {
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+      }}
+      className="flex items-center gap-3 w-full px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 mt-6"
+    >
+      <LogOut className="w-5 h-5" /> Logout
+    </button>
+  </nav>
 
-        <nav className="space-y-3 mt-6">
-          {[
-            { name: "Analytics", icon: BarChart3, key: "analytics" },
-            { name: "Users", icon: Users, key: "users" },
-            { name: "Jobs", icon: Briefcase, key: "jobs" },
-          ].map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => {
-                setActiveTab(tab.key);
-                setSidebarOpen(false);
-              }}
-              className={`flex items-center gap-3 w-full px-4 py-2 rounded-lg transition ${
-                activeTab === tab.key
-                  ? "bg-blue-700"
-                  : "hover:bg-blue-800 hover:translate-x-1"
-              }`}
-            >
-              <tab.icon className="w-5 h-5" />
-              {tab.name}
-            </button>
-          ))}
-          <button
-            onClick={() => {
-              localStorage.removeItem("token");
-              window.location.href = "/login";
-            }}
-            className="flex items-center gap-3 w-full px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 mt-6"
-          >
-            <LogOut className="w-5 h-5" /> Logout
-          </button>
-        </nav>
+  <div className="mt-auto flex justify-center">
+    <button
+      onClick={() => setDarkMode(!darkMode)}
+      className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm"
+    >
+      {darkMode ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5" />}
+      {darkMode ? "Light Mode" : "Dark Mode"}
+    </button>
+  </div>
+</motion.aside>
 
-        <div className="mt-auto flex justify-center">
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm"
-          >
-            {darkMode ? (
-              <Sun className="w-5 h-5 text-yellow-400" />
-            ) : (
-              <Moon className="w-5 h-5" />
-            )}
-            {darkMode ? "Light Mode" : "Dark Mode"}
-          </button>
-        </div>
-      </motion.aside>
 
-      {/* Mobile overlay */}
-      {sidebarOpen && (
-        <div
-          onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
-        />
-      )}
+{/* Mobile overlay */}
+{sidebarOpen && window.innerWidth < 1024 && (
+  <div
+    onClick={() => setSidebarOpen(false)}
+    className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
+  />
+)}
 
       {/* Main content */}
       <main className="flex-1 p-4 sm:p-6 lg:ml-64 transition-all duration-300 overflow-y-auto relative">

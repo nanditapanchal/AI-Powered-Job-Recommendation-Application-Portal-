@@ -1,193 +1,164 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { Briefcase, Users, Target, ArrowRight, Zap } from "lucide-react";
+import { Briefcase, Users, Target, Rocket, Sparkles, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Button from "../components/Button";
 
 export default function Home() {
+  const navigate = useNavigate();
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8, ease: "easeInOut" }}
-      className="min-h-screen flex flex-col bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800"
+      className="min-h-screen flex flex-col bg-gradient-to-br from-gray-900 via-slate-900 to-gray-800 text-gray-100"
     >
       {/* Navbar */}
-      <motion.div
-        initial={{ y: -40, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.7, ease: "easeOut" }}
-      >
-        <Navbar />
-      </motion.div>
+      <Navbar />
 
       {/* Hero Section */}
-      <section className="relative flex flex-col items-center justify-center text-center px-6 md:px-12 py-24 overflow-hidden bg-gradient-to-br from-blue-700 via-indigo-600 to-blue-800 text-white">
-        {/* Background glow */}
-        <motion.div
-          className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.1),transparent)]"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1.8 }}
-        />
+      <section className="relative flex flex-col items-center justify-center text-center px-4 sm:px-8 md:px-12 py-24 md:py-32 overflow-hidden">
+        {/* Background lighting effect */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.15),transparent_60%)] pointer-events-none" />
 
-        {/* Hero content */}
         <motion.h1
           initial={{ opacity: 0, y: -40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="text-4xl md:text-6xl font-extrabold leading-tight mb-4 drop-shadow-lg"
+          transition={{ duration: 0.8 }}
+          className="text-3xl sm:text-5xl md:text-6xl font-extrabold leading-tight mb-5"
         >
-          Empowering <span className="text-yellow-300">Careers</span> &{" "}
-          <span className="text-teal-300">Building Teams</span>
+          <span className="text-indigo-400">JobRec</span>:{" "}
+          <span className="text-white">Where Talent Meets Opportunity</span>
         </motion.h1>
 
         <motion.p
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.8 }}
-          className="text-lg md:text-xl text-gray-100 mb-10 max-w-2xl"
+          transition={{ delay: 0.2, duration: 0.8 }}
+          className="text-base sm:text-lg md:text-xl text-gray-300 max-w-xl sm:max-w-2xl mb-10"
         >
-          Discover a smarter way to connect job seekers and recruiters through
-          AI-powered insights and real-time opportunities.
+          Harness the power of AI to connect recruiters and candidates faster than ever —
+          effortless, intelligent, and personalized.
         </motion.p>
 
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
+          initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.6, duration: 0.6, ease: "easeOut" }}
-          className="flex flex-wrap justify-center gap-4"
+          transition={{ delay: 0.4, duration: 0.7 }}
+          className="flex flex-col sm:flex-row gap-4 justify-center"
         >
-          <Link to="/register">
-            <Button className="bg-gradient-to-r from-yellow-300 to-yellow-400 text-blue-900 font-semibold hover:scale-105 hover:shadow-xl px-6 py-3 rounded-lg shadow-md transition-all duration-300">
-              Get Started <ArrowRight className="ml-2 inline-block" size={18} />
-            </Button>
-          </Link>
-          <Link to="/login">
-            <Button className="bg-transparent border border-white text-white hover:bg-white hover:text-blue-700 px-6 py-3 rounded-lg hover:scale-105 transition-all duration-300">
-              Login
-            </Button>
-          </Link>
-        </motion.div>
+          <Button
+            onClick={() => navigate("/register")}
+            className="w-full sm:w-auto bg-gradient-to-r from-indigo-400 to-violet-500 text-white font-semibold hover:scale-105 hover:shadow-xl px-6 py-3 rounded-lg shadow-md transition-all duration-300"
+          >
+            Get Started <ArrowRight className="ml-2 inline-block" size={18} />
+          </Button>
 
-        {/* Floating element */}
-        <motion.div
-          className="absolute -bottom-12 right-12 opacity-30"
-          animate={{ y: [0, 15, 0] }}
-          transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-        >
-          <Zap size={100} />
+          <Button
+            onClick={() => navigate("/login")}
+            className="w-full sm:w-auto bg-transparent border border-indigo-300 text-indigo-200 hover:bg-indigo-500 hover:text-white px-6 py-3 rounded-lg hover:scale-105 transition-all duration-300"
+          >
+            Login
+          </Button>
         </motion.div>
       </section>
 
       {/* Features Section */}
-      <section className="py-20 px-6 md:px-12 bg-white">
+      <section className="py-20 px-4 sm:px-8 md:px-12 bg-gradient-to-b from-gray-900 to-slate-800 text-gray-100">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
-          className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800"
+          className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12"
         >
-          Why <span className="text-blue-600">JobRec</span> is Your Smart Choice
+          Why Choose <span className="text-indigo-400">JobRec</span>?
         </motion.h2>
 
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {[
             {
-              icon: <Briefcase className="text-blue-600" size={34} />,
-              title: "AI-Powered Job Matching",
-              desc: "Get personalized job suggestions using advanced AI analysis of your profile and career goals.",
-              delay: 0.1,
+              icon: <Briefcase className="text-indigo-400 w-10 h-10" />,
+              title: "AI-Driven Job Matching",
+              desc: "Instantly get the best opportunities tailored to your skills and goals using advanced machine learning.",
             },
             {
-              icon: <Users className="text-purple-600" size={34} />,
-              title: "Smart Recruiter Dashboard",
-              desc: "Manage job posts, track applications, and discover ideal candidates with one click.",
-              delay: 0.2,
+              icon: <Users className="text-violet-400 w-10 h-10" />,
+              title: "Recruit Smarter, Faster",
+              desc: "Recruiters can post jobs, analyze applicants, and find the perfect match — all from one dashboard.",
             },
             {
-              icon: <Target className="text-green-600" size={34} />,
-              title: "Data-Driven Insights",
-              desc: "Monitor hiring trends and improve decisions through real-time analytics and recommendations.",
-              delay: 0.3,
+              icon: <Target className="text-blue-400 w-10 h-10" />,
+              title: "Personalized Insights",
+              desc: "Track hiring trends, analyze skill gaps, and make data-driven career or hiring decisions.",
             },
-          ].map((f, i) => (
+          ].map((feature, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: f.delay, duration: 0.6, ease: "easeOut" }}
+              transition={{ delay: i * 0.2, duration: 0.6 }}
               viewport={{ once: true }}
-              whileHover={{ scale: 1.04 }}
-              className="bg-gradient-to-b from-gray-50 to-white p-8 rounded-2xl border shadow-sm hover:shadow-xl text-center transition-all duration-300"
+              whileHover={{ scale: 1.05 }}
+              className="bg-gradient-to-b from-gray-800 to-gray-900 p-8 rounded-2xl border border-gray-700 hover:border-indigo-400 text-center shadow-md hover:shadow-indigo-600/30 transition-all duration-300"
             >
-              <div className="flex justify-center mb-4">{f.icon}</div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-800">
-                {f.title}
-              </h3>
-              <p className="text-gray-600 leading-relaxed">{f.desc}</p>
+              <div className="flex justify-center mb-4">{feature.icon}</div>
+              <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+              <p className="text-gray-400 text-sm sm:text-base">{feature.desc}</p>
             </motion.div>
           ))}
         </div>
       </section>
+{/* CTA Section */}
+<section className="relative py-20 px-4 sm:px-8 md:px-12 bg-gradient-to-r from-indigo-700 via-violet-700 to-blue-600 text-center text-white overflow-hidden">
+  <motion.div
+    className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.05),transparent)]"
+    initial={{ opacity: 0 }}
+    whileInView={{ opacity: 1 }}
+    transition={{ duration: 1.5 }}
+  />
+  <Rocket className="absolute top-8 left-8 opacity-10 w-24 h-24" />
+  <Sparkles className="absolute bottom-8 right-8 opacity-10 w-20 h-20" />
 
-      {/* CTA Section */}
-      <section className="relative py-20 px-6 md:px-12 bg-gradient-to-r from-indigo-600 to-blue-600 text-white text-center overflow-hidden">
-        <motion.div
-          className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.05),transparent)]"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 1.5 }}
-        />
-        <motion.h2
-          initial={{ opacity: 0, y: -30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-3xl md:text-4xl font-bold mb-4"
-        >
-          Start Your Journey with{" "}
-          <span className="text-yellow-300">JobRec</span>
-        </motion.h2>
-        <motion.p
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.6 }}
-          className="text-lg text-gray-100 mb-8 max-w-2xl mx-auto"
-        >
-          Whether you’re hiring top talent or landing your dream job, JobRec is
-          designed to make it effortless, fast, and delightful.
-        </motion.p>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.4, duration: 0.6 }}
-        >
-          <Link to="/register">
-            <Button className="bg-gradient-to-r from-yellow-300 to-yellow-400 text-blue-900 font-semibold hover:scale-105 hover:shadow-xl px-8 py-3 rounded-lg shadow-lg transition-all">
-              Join Now
-            </Button>
-          </Link>
-        </motion.div>
-      </section>
+  <motion.h2
+    initial={{ opacity: 0, y: -20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.7 }}
+    className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4"
+  >
+    Take Your Career to New Heights 🚀
+  </motion.h2>
+  <motion.p
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    transition={{ delay: 0.3, duration: 0.7 }}
+    className="text-base sm:text-lg text-gray-200 max-w-2xl mx-auto"
+  >
+    Whether you're hiring or job hunting, JobRec empowers your next move with AI,
+    insights, and speed.
+  </motion.p>
+</section>
+
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-400 py-8 text-center">
-        <p className="text-sm">
+      <footer className="bg-gray-950 text-gray-400 py-8 text-center border-t border-gray-800">
+        <p className="text-sm sm:text-base">
           © {new Date().getFullYear()}{" "}
-          <span className="text-white font-semibold">JobRec</span>. All rights reserved to Nandita Panchal.
+          <span className="text-indigo-400 font-semibold">JobRec</span>. Built by{" "}
+          <span className="text-white">Nandita Panchal</span>.
         </p>
-        <div className="flex justify-center gap-6 mt-3 text-gray-500 text-sm">
-          <Link to="/about" className="hover:text-white transition">
+        <div className="flex flex-wrap justify-center gap-6 mt-4 text-gray-500 text-sm">
+          <a href="/about" className="hover:text-indigo-300 transition">
             About
-          </Link>
-          <Link to="/privacy" className="hover:text-white transition">
+          </a>
+          <a href="/privacy" className="hover:text-indigo-300 transition">
             Privacy
-          </Link>
-          <Link to="/contact" className="hover:text-white transition">
+          </a>
+          <a href="/contact" className="hover:text-indigo-300 transition">
             Contact
-          </Link>
+          </a>
         </div>
       </footer>
     </motion.div>
