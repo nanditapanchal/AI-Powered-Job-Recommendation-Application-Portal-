@@ -386,9 +386,9 @@ export default function CandidateDashboard() {
                 <p>No AI recommendations available yet.</p>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {recommendedJobs.map((rec, idx) => {
-  const job = rec; // since your backend returns flat structure now
-  const applied = isApplied({ _id: job.jobId });
+                {recommendedJobs.map((rec, idx) => {
+  const { job, jobId, similarity } = rec;
+  const applied = isApplied({ _id: jobId });
 
   return (
     <motion.div
@@ -403,7 +403,7 @@ export default function CandidateDashboard() {
           Skills: {(job.skills_required || []).join(", ")}
         </p>
         <p className="text-xs text-gray-400 mt-1">
-          Similarity Score: {job.similarity}
+          Similarity Score: {similarity}
         </p>
       </div>
       <div className="mt-4 flex items-center justify-between">
@@ -412,7 +412,7 @@ export default function CandidateDashboard() {
             <CheckCircle className="w-5 h-5" /> Applied
           </span>
         ) : (
-          <Button onClick={() => openApplyModal({ _id: job.jobId, ...job })}>
+          <Button onClick={() => openApplyModal({ _id: jobId, ...job })}>
             Apply
           </Button>
         )}
